@@ -30,7 +30,6 @@ public class AsyncLoadTemplate {
 
   /**
    * 执行一个任务
-   * todo future/task学习
    * @param callable 带有返回值的任务
    * @param <R> 真实返回值类型
    * @return 返回值对应的代理类
@@ -46,6 +45,17 @@ public class AsyncLoadTemplate {
 
     // 执行任务并返回动态代理类
     return execute(config, returnClassType, callable);
+  }
+
+  /**
+   * 针对lambda类是无法获取到对应的返回值信息
+   * @param returnClass 返回值类型
+   * @return 调用返回值
+   */
+  public <R> R execute(Callable<R> callable,Class<R> returnClass) {
+    final AsyncLoadConfig config = this.config;
+    // 执行任务并返回动态代理类
+    return execute(config, returnClass, callable);
   }
 
   @SuppressWarnings("unchecked")

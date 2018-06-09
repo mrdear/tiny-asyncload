@@ -24,7 +24,8 @@ public class FutureTaskTest {
   private ExecutorService executorService = Executors.newCachedThreadPool();
 
   private UserService userService = new UserService();
-// ---------旧方式是显式创建提交并获取结果
+
+  // ---------旧方式是显式创建提交并获取结果
   @Test
   public void testOldFindById() throws ExecutionException, InterruptedException {
     long startTime = System.currentTimeMillis();
@@ -55,7 +56,10 @@ public class FutureTaskTest {
 
   @Test
   public void testNewFindById() throws ExecutionException, InterruptedException {
-    AsyncLoadConfig config = new AsyncLoadConfig(Executors.newCachedThreadPool(),3000L);
+    AsyncLoadConfig config = AsyncLoadConfig.builder()
+        .defaultTimeout(3000L)
+        .executorService(executorService)
+        .build();
     AsyncLoadTemplate template = new AsyncLoadTemplate(config);
     long startTime = System.currentTimeMillis();
     User user = template.execute(new Callable<User>() {
@@ -73,18 +77,21 @@ public class FutureTaskTest {
 
 
   @Test
-  public void testNewQueryByIds() throws ExecutionException, InterruptedException {
+  public void testNewQueryByIds() throws InterruptedException {
     long startTime = System.currentTimeMillis();
-    AsyncLoadConfig config = new AsyncLoadConfig(Executors.newCachedThreadPool(),3000L);
+    AsyncLoadConfig config = AsyncLoadConfig.builder()
+        .defaultTimeout(3000L)
+        .executorService(executorService)
+        .build();
     AsyncLoadTemplate template = new AsyncLoadTemplate(config);
-    // 使用模板方式执行异步任务,返回代理类
-    List<User> users = template.execute(new Callable<List<User>>() {
-      @Override
-      public List<User> call() throws Exception {
-        Thread.sleep(2000);
-        return Collections.singletonList(User.mockUser());
-      }
-    });
+
+    // 使用模板方式执行异步任务,返回代理类,解决lambda无法获取返回值信息问题,这里总是有checked,无法解决
+    List<User> users = (List<User>) template
+        .execute(() -> {
+          Thread.sleep(2000);
+          return Collections.singletonList(User.mockUser());
+        }, List.class);
+
     Thread.sleep(2000);
     Assert.assertTrue(System.currentTimeMillis() - startTime > 2000L);
     Assert.assertTrue(System.currentTimeMillis() - startTime < 2500L);
