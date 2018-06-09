@@ -63,14 +63,14 @@ public class Assert {
     }
   }
 
-  public static void euqals(Object o1, Object o2, String message) {
-    if (!Objects.equals(o1, o1)) {
+  public static void equals(Object o1, Object o2, String message) {
+    if (!Objects.equals(o1, o2)) {
       throw new IllegalArgumentException(message);
     }
   }
 
-  public static void euqals(Object o1, Object o2, String message, Object... additional) {
-    if (!Objects.equals(o1, o1)) {
+  public static void equals(Object o1, Object o2, String message, Object... additional) {
+    if (!Objects.equals(o1, o2)) {
       throw new IllegalArgumentException(message + Arrays.toString(additional));
     }
   }
